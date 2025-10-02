@@ -50,23 +50,3 @@ navLinks.forEach((link) => {
     targetSection.scrollIntoView({ behavior: 'smooth' });
   });
 });
-
-// Fade-in sections on scroll
-const allSections = document.querySelectorAll('.section');
-
-const observerOptions = {
-  threshold: 0.2, // triggers when 20% of section is visible
-};
-
-const observer = new IntersectionObserver((entries, observer) => {
-  entries.forEach((entry) => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-      observer.unobserve(entry.target); // optional: only animate once
-    }
-  });
-}, observerOptions);
-
-allSections.forEach((section) => {
-  observer.observe(section);
-});
