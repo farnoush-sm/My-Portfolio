@@ -100,6 +100,42 @@ body {
   padding: 6rem 2rem;
   max-width: 1200px;
   margin: 0 auto;
+
+  /* initial state for desktop animations */
+  opacity: 0;
+  transform: translateY(50px); /* default sile-up for scrolling down */
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+/* Slide-in from right variant */
+.slide-right {
+  transform: translateX(50px);
+}
+
+/* Slide-in from left variant */
+.slide-left {
+  transform: translateX(-50px);
+}
+
+/* Reverse animations for desktop scroll-up */
+.slide-left-reverse {
+  transform: translateX(-50px);
+  opacity: 0;
+}
+.slide-right-reverse {
+  transform: translateX(50px);
+  opacity: 0;
+}
+
+/* Visible state when scrolling down */
+.section.visible {
+  opacity: 1;
+  transform: translateX(0) translateY(0);
+}
+
+.section.visible.slide-left,
+.section.visible.slide-right {
+  transform: translateX(0);
 }
 
 .section h2 {
