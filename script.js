@@ -13,8 +13,21 @@ let lastScrollY = window.scrollY;
 // Hamburger toggle
 // ==========================
 hamburger.addEventListener('click', () => {
-  navLinksMobile.classList.toggle('show');
-  hamburger.classList.toggle('active');
+  navLinksMobile.classList.toggle('show'); // toggle dropdown
+  hamburger.classList.toggle('active'); // animate button
+  document.body.classList.toggle('menu-open'); // blur background
+});
+
+// Close hamburger when clicking outside
+document.body.addEventListener('click', (e) => {
+  if (
+    navLinksMobile.classList.contains('show') && // menu is open
+    !navbar.contains(e.target) // click is outside navbar
+  ) {
+    navLinksMobile.classList.remove('show');
+    hamburger.classList.remove('active');
+    document.body.classList.remove('menu-open');
+  }
 });
 
 // Smooth scroll & auto-close mobile menu
