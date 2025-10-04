@@ -132,10 +132,10 @@ body.menu-open > *:not(.navbar) {
   padding: 6rem 2rem;
   max-width: 1200px;
   margin: 0 auto;
+  min-width: 50vh;
 
   /* initial animation state */
   opacity: 0;
-  transform: translateY(50px);
   transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
@@ -154,7 +154,7 @@ body.menu-open > *:not(.navbar) {
 
 .section.visible.slide-left,
 .section.visible.slide-right {
-  transform: translateX(0);
+  transform: translateX(0) translateY(0);
 }
 
 .section h2 {
