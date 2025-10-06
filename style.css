@@ -266,6 +266,7 @@ body.menu-open > *:not(.navbar) {
 
 /* Individual skill card */
 .skill-card {
+  position: relative;
   border: 2px solid var(--accent-red);
   border-radius: 12px;
   padding: 1.5rem;
@@ -284,13 +285,19 @@ body.menu-open > *:not(.navbar) {
   transform: translateY(-5px);
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
 }
-
+.skill-icon {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
 /* Icon */
 .skill-icon img {
   width: 40px;
   height: 40px;
   margin-bottom: 0.8rem;
   object-fit: contain;
+}
+.skill-card:hover .skill-icon {
+  transform: scale(1.2);
 }
 
 /* Titles */
