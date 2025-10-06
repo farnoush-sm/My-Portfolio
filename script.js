@@ -21,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
           const progressDiv = entry.target.querySelector('.skill-progress');
           const fill = entry.target.querySelector('.progress-fill');
 
-          // Recommended: Extract value from a custom data attribute for robustness
           // Fallback to label text if data attribute isn't set
           let value;
           if (progressDiv.hasAttribute('aria-valuenow')) {

@@ -30,12 +30,16 @@
   padding: 0;
   box-sizing: border-box;
 }
+html {
+  scroll-behavior: smooth;
+}
 
 body {
   font-family: 'Poppins', sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.6;
+  overflow-x: hidden;
 }
 
 /* ==========================
@@ -67,6 +71,12 @@ body {
   font-size: 1.5rem;
   font-weight: bold;
   color: var(--accent-cream);
+  cursor: default;
+}
+
+.navbar .logo:hover {
+  color: var(--accent-sage);
+  transition: color 0.3s;
 }
 
 .nav-links {
@@ -79,6 +89,11 @@ body {
   text-decoration: none;
   color: var(--text-primary);
   transition: color 0.3s;
+}
+
+.nav-links a:focus {
+  outline: 2px solid var(--accent-red);
+  outline-offset: 2px;
 }
 
 .nav-links a:hover,
@@ -169,10 +184,8 @@ body.menu-open > *:not(.navbar) {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: url(images/hero-background.png);
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
+  background: url(images/hero-background.png) no-repeat center/cover,
+    var(--bg-secondary);
   text-align: center;
 }
 
@@ -193,11 +206,37 @@ body.menu-open > *:not(.navbar) {
   color: var(--text-primary);
   text-decoration: none;
   border-radius: 5px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
   transition: background-color 0.3s;
 }
 
 .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.4);
   background-color: var(--accent-maroon);
+}
+
+.hero h1,
+.hero p,
+.hero .btn {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.hero.visible h1 {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0.2s;
+}
+.hero.visible p {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0.4s;
+}
+.hero.visible .btn {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0.6s;
 }
 
 /*Skills Section*/
@@ -251,6 +290,7 @@ body.menu-open > *:not(.navbar) {
   width: 40px;
   height: 40px;
   margin-bottom: 0.8rem;
+  object-fit: contain;
 }
 
 /* Titles */
@@ -276,9 +316,10 @@ body.menu-open > *:not(.navbar) {
 }
 
 .skill-progress label {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
+  font-weight: 600;
   min-width: 35px;
-  color: var(--accent-teal);
+  color: var(--accent-sage);
 }
 /* container for the bar */
 .progress-bar {
