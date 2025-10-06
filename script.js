@@ -1,161 +1,197 @@
-document.addEventListener('DOMContentLoaded', () => {
-  // ==========================
-  // Elements
-  // ==========================
-  const navbar = document.querySelector('.navbar');
-  const sections = document.querySelectorAll('section, header');
-  const navLinks = document.querySelectorAll('.nav-links a');
-  const hamburger = document.querySelector('.hamburger');
-  const navLinksMobile = document.querySelector('.nav-links');
-  const skillCards = document.querySelectorAll('.skill-card'); // Animate once
+// Element References
+const navbar = document.querySelector('.navbar');
+const navLinksMobile = document.querySelector('.nav-links');
+const hamburger = document.querySelector('.hamburger');
+const navLinks = document.querySelectorAll('.nav-links a');
+const sections = document.querySelectorAll('section, header');
+const skillCards = document.querySelectorAll('.skill-card');
+const projectCarousel = document.querySelector('.project-carousel');
+const projectCards = document.querySelectorAll('.project-card');
+const carouselArrows = document.querySelectorAll('.carousel-arrow');
 
-  let lastScrollY = window.scrollY;
+// Utility Functions
+const toggleMobileMenu = () => {
+  navLinksMobile.classList.toggle('show');
+  hamburger.classList.toggle('active');
+  document.body.classList.toggle('menu-open');
+  document.body.style.overflow = document.body.classList.contains('menu-open')
+    ? 'hidden'
+    : '';
+  const isExpanded = hamburger.getAttribute('aria-expanded') === 'true';
+  hamburger.setAttribute('aria-expanded', !isExpanded);
+};
 
-  // ==========================================
-  // 1. SKILLS BAR OBSERVER (Animate Once)
-  // ==========================================
-  const skillObserver = new IntersectionObserver(
-    (entries, observer) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const progressDiv = entry.target.querySelector('.skill-progress');
-          const fill = entry.target.querySelector('.progress-fill');
+const updateActiveLink = () => {
+  const viewportTop = window.scrollY;
+  let current = '';
 
-          // Fallback to label text if data attribute isn't set
-          let value;
-          if (progressDiv.hasAttribute('aria-valuenow')) {
-            value = progressDiv.getAttribute('aria-valuenow');
-          } else {
-            // Using the existing label text as a fallback
-            const label = entry.target.querySelector('.skill-progress label');
-            value = parseInt(label.textContent);
-          }
-
-          fill.style.width = value + '%'; // Trigger CSS transition
-
-          observer.unobserve(entry.target); // <-- CRITICAL: Animate only once
-        }
-      });
-    },
-    { threshold: 0.5 } // Triggers when 50% of card is visible
-  );
-
-  skillCards.forEach((card) => skillObserver.observe(card));
-
-  // ==========================================
-  // 2. SECTION SLIDE OBSERVER (Animate Every Time)
-  // ==========================================
-  const sectionObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        // If section is visible, add 'visible' to trigger slide
-        if (entry.isIntersecting) {
-          // We only want the home section to be "visible" on load without animation
-          if (entry.target.id === 'home' && window.scrollY === 0) {
-            entry.target.classList.add('visible');
-          } else {
-            // For all other sections, add 'visible' to trigger the slide-in
-            entry.target.classList.add('visible');
-          }
-        } else {
-          // CRITICAL: Remove 'visible' when leaving the viewport
-          // This resets the section to the 'slide-left' or 'slide-right' state
-          // so it can animate again when re-entering.
-          entry.target.classList.remove('visible');
-        }
-      });
-    },
-    // Root Margin is used to adjust the boundary box.
-    // 0.15 threshold is fine, but using rootMargin is often better for sections.
-    { rootMargin: '0px 0px -150px 0px', threshold: 0.05 }
-  );
-
-  // Start observing all sections
   sections.forEach((section) => {
-    sectionObserver.observe(section);
+    const sectionTop = section.offsetTop;
+    const sectionBottom = sectionTop + section.offsetHeight;
+    if (viewportTop >= sectionTop - 90 && viewportTop < sectionBottom - 90) {
+      current = section.getAttribute('id');
+    }
   });
 
-  // Ensure 'home' is visible on page load (since it's not a slide animation)
-  document.querySelector('#home').classList.add('visible');
+  navLinks.forEach((link) => {
+    link.classList.remove('active');
+    if (link.getAttribute('href') === `#${current}`) {
+      link.classList.add('active');
+    }
+  });
+};
 
-  // ==========================
-  // Hamburger toggle
-  // ==========================
-  hamburger.addEventListener('click', () => {
-    navLinksMobile.classList.toggle('show');
-    hamburger.classList.toggle('active');
-    document.body.classList.toggle('menu-open');
+const debounce = (func, wait) => {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), wait);
+  };
+};
+
+const updateCenterCard = () => {
+  if (!projectCarousel) return;
+
+  const carouselRect = projectCarousel.getBoundingClientRect();
+  const carouselCenter = carouselRect.left + carouselRect.width / 2;
+
+  let closestCard = null;
+  let minDistance = Infinity;
+
+  projectCards.forEach((card) => {
+    const cardRect = card.getBoundingClientRect();
+    const cardCenter = cardRect.left + cardRect.width / 2;
+    const distance = Math.abs(cardCenter - carouselCenter);
+
+    if (distance < minDistance) {
+      minDistance = distance;
+      closestCard = card;
+    }
   });
 
-  // Close hamburger when clicking outside
+  projectCards.forEach((card) => {
+    card.classList.toggle('center', card === closestCard);
+  });
+};
+
+const scrollCarousel = (direction) => {
+  if (!projectCarousel) return;
+  const cardWidth = projectCards[0]?.getBoundingClientRect().width || 250;
+  const scrollAmount = direction === 'left' ? -cardWidth : cardWidth;
+  projectCarousel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+};
+
+const debouncedUpdateCenterCard = debounce(updateCenterCard, 100);
+
+// Intersection Observers
+const skillObserver = new IntersectionObserver(
+  (entries, observer) => {
+    entries.forEach((entry, index) => {
+      if (entry.isIntersecting) {
+        const progressDiv = entry.target.querySelector('.skill-progress');
+        const fill = entry.target.querySelector('.progress-fill');
+        const value =
+          progressDiv.getAttribute('aria-valuenow') ||
+          parseInt(
+            entry.target.querySelector('.skill-progress label').textContent
+          );
+
+        entry.target.classList.add('visible');
+        setTimeout(() => {
+          fill.style.width = `${value}%`;
+        }, index * 100);
+
+        observer.unobserve(entry.target);
+      }
+    });
+  },
+  { threshold: 0.5 }
+);
+
+const sectionObserver = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        if (entry.target.id === 'home' && window.scrollY === 0) {
+          entry.target.classList.add('visible');
+        } else {
+          entry.target.classList.add('visible');
+        }
+      } else {
+        entry.target.classList.remove('visible');
+      }
+    });
+  },
+  { rootMargin: '0px 0px -150px 0px', threshold: 0.05 }
+);
+
+// Event Listeners
+if (navbar && navLinksMobile && hamburger) {
+  hamburger.addEventListener('click', toggleMobileMenu);
+
   document.body.addEventListener('click', (e) => {
     if (
       navLinksMobile.classList.contains('show') &&
       !navbar.contains(e.target)
     ) {
-      navLinksMobile.classList.remove('show');
-      hamburger.classList.remove('active');
-      document.body.classList.remove('menu-open');
+      toggleMobileMenu();
     }
   });
+}
 
-  // Smooth scroll & auto-close mobile menu
-  navLinks.forEach((link) => {
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-      const targetId = link.getAttribute('href').substring(1);
-      document.getElementById(targetId).scrollIntoView({ behavior: 'smooth' });
+navLinks.forEach((link) => {
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    const targetId = link.getAttribute('href').substring(1);
+    document.getElementById(targetId).scrollIntoView({ behavior: 'smooth' });
 
-      // Auto-close menu on mobile click
-      if (window.innerWidth <= 768) {
-        navLinksMobile.classList.remove('show');
-        hamburger.classList.remove('active');
-        document.body.classList.remove('menu-open');
-      }
-    });
-  });
-
-  // ==========================
-  // Scroll: active link, navbar hide/show
-  // ==========================
-  window.addEventListener('scroll', () => {
-    let current = '';
-    const viewportTop = window.scrollY;
-
-    // --- Active link logic ---
-    sections.forEach((section) => {
-      const sectionTop = section.offsetTop;
-      const sectionBottom = sectionTop + section.offsetHeight;
-
-      // Determines the currently active section for the nav highlight
-      if (viewportTop >= sectionTop - 90 && viewportTop < sectionBottom - 90) {
-        current = section.getAttribute('id');
-      }
-    });
-
-    // Update active nav link
-    navLinks.forEach((link) => {
-      link.classList.remove('active');
-      if (link.getAttribute('href') === `#${current}`) {
-        link.classList.add('active');
-      }
-    });
-
-    // --- Navbar hide/show for mobile ---
     if (window.innerWidth <= 768) {
-      // Only hide/show if the mobile menu is NOT open
-      if (!navLinksMobile.classList.contains('show')) {
-        if (window.scrollY > lastScrollY && window.scrollY > 100) {
-          // Add > 100 to avoid flicker at top
-          navbar.classList.add('hide');
-        } else {
-          navbar.classList.remove('hide');
-        }
-      }
-      lastScrollY = window.scrollY;
+      toggleMobileMenu();
+    }
+  });
+});
+
+let lastScrollY = window.scrollY;
+const debouncedScrollHandler = debounce(() => {
+  updateActiveLink();
+
+  if (window.innerWidth <= 768 && !navLinksMobile.classList.contains('show')) {
+    if (window.scrollY > lastScrollY && window.scrollY > 100) {
+      navbar.classList.add('hide');
     } else {
-      // Ensure desktop always shows navbar
       navbar.classList.remove('hide');
     }
+  } else {
+    navbar.classList.remove('hide');
+  }
+  lastScrollY = window.scrollY;
+}, 100);
+
+window.addEventListener('scroll', debouncedScrollHandler);
+
+if (projectCarousel) {
+  projectCarousel.addEventListener('scroll', debouncedUpdateCenterCard);
+  window.addEventListener('resize', debouncedUpdateCenterCard);
+  carouselArrows.forEach((arrow) => {
+    arrow.addEventListener('click', () => {
+      const direction = arrow.classList.contains('left') ? 'left' : 'right';
+      scrollCarousel(direction);
+    });
   });
+}
+
+// Initialization
+document.addEventListener('DOMContentLoaded', () => {
+  if (!navbar || !navLinksMobile || !hamburger) {
+    console.warn('One or more navbar elements not found');
+    return;
+  }
+  if (!projectCarousel || projectCards.length === 0) {
+    console.warn('Project carousel or cards not found');
+  }
+
+  document.querySelector('#home')?.classList.add('visible');
+  skillCards.forEach((card) => skillObserver.observe(card));
+  sections.forEach((section) => sectionObserver.observe(section));
+  updateCenterCard();
 });

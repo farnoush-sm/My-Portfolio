@@ -32,6 +32,13 @@
 }
 html {
   scroll-behavior: smooth;
+  height: 100%;
+  -ms-overflow-style: none; /* IE, Edge */
+  scrollbar-width: none; /* Firefox */
+}
+/* Hide vertical scrollbar */
+html::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
 }
 
 body {
@@ -40,6 +47,8 @@ body {
   color: var(--text-primary);
   line-height: 1.6;
   overflow-x: hidden;
+  overflow-y: auto;
+  height: 100%;
 }
 
 /* ==========================
@@ -355,10 +364,111 @@ body.menu-open > *:not(.navbar) {
 }
 
 /* Projects */
-.project-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
+/* Projects Carousel */
+.project-carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory; /* Snaps to center of each card */
+  gap: 1rem; /* Space between cards */
+  padding: 1rem 0; /* Extra padding for smooth scrolling */
+  scrollbar-width: thin; /* Slim scrollbar for Firefox */
+  -ms-overflow-style: none; /* Hide scrollbar in IE/Edge */
+}
+
+.project-carousel::-webkit-scrollbar {
+  height: 8px; /* Slim scrollbar for Chrome/Safari */
+}
+
+.project-carousel::-webkit-scrollbar-thumb {
+  background: var(--accent-red);
+  border-radius: 5px;
+}
+
+.project-carousel::-webkit-scrollbar-track {
+  background: var(--border-color);
+}
+
+/* Individual project card */
+.project-card {
+  flex: 0 0 250px; /* Fixed width for side cards */
+  min-width: 250px; /* Ensures consistent sizing */
+  border: 2px solid var(--accent-red);
+  border-radius: 12px;
+  padding: 1rem;
+  background: rgba(46, 63, 78, 0.85); /* Matches skill-card */
+  backdrop-filter: blur(4px);
+  transition: transform 0.3s ease, flex 0.3s ease, box-shadow 0.3s ease;
+  scroll-snap-align: center; /* Snaps card to center */
+  text-align: center; /* Center text for projects */
+}
+
+.project-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+}
+
+.project-image {
+  width: 100%;
+  height: 150px;
+  object-fit: cover; /* Covers the area without distortion */
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.project-card h3 {
+  font-size: 1.1rem;
+  color: var(--accent-cream);
+  margin-bottom: 0.5rem;
+}
+
+.project-desc {
+  display: none; /* Hidden by default */
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* Center card styles */
+.project-card.center {
+  flex: 0 0 300px; /* Larger width for more space */
+  min-width: 300px;
+  transform: scale(1.2); /* Scaled larger */
+  z-index: 1; /* Stacks above others */
+}
+
+.project-card.center .project-desc {
+  display: block; /* Show description */
+}
+
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(46, 63, 78, 0.85);
+  border: 2px solid var(--accent-red);
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  transition: background-color 0.3s;
+}
+
+.carousel-arrow:hover {
+  background-color: var(--accent-maroon);
+}
+
+.carousel-arrow.left {
+  left: 10px;
+}
+
+.carousel-arrow.right {
+  right: 10px;
 }
 
 /* Resume */
@@ -434,6 +544,25 @@ footer {
   .skills-list {
     flex-direction: column;
     align-items: center;
+  }
+  .project-carousel {
+    gap: 0.5rem;
+  }
+
+  .project-card {
+    flex: 0 0 200px;
+    min-width: 200px;
+  }
+
+  .project-card.center {
+    flex: 0 0 240px;
+    min-width: 240px;
+  }
+
+  .carousel-arrow {
+    width: 32px;
+    height: 32px;
+    font-size: 1.2rem;
   }
 }
 
