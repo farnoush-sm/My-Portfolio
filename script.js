@@ -5,11 +5,16 @@ const hamburger = document.querySelector('.hamburger');
 const navLinks = document.querySelectorAll('.nav-links a');
 const sections = document.querySelectorAll('section, header');
 const skillCards = document.querySelectorAll('.skill-card');
-const projectCarousel = document.querySelector('.project-carousel');
-const projectCards = document.querySelectorAll('.project-card');
-const carouselArrows = document.querySelectorAll('.carousel-arrow');
 
 // Utility Functions
+const debounce = (func, wait) => {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), wait);
+  };
+};
+
 const toggleMobileMenu = () => {
   navLinksMobile.classList.toggle('show');
   hamburger.classList.toggle('active');
@@ -41,48 +46,6 @@ const updateActiveLink = () => {
   });
 };
 
-const debounce = (func, wait) => {
-  let timeout;
-  return (...args) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(this, args), wait);
-  };
-};
-
-const updateCenterCard = () => {
-  if (!projectCarousel) return;
-
-  const carouselRect = projectCarousel.getBoundingClientRect();
-  const carouselCenter = carouselRect.left + carouselRect.width / 2;
-
-  let closestCard = null;
-  let minDistance = Infinity;
-
-  projectCards.forEach((card) => {
-    const cardRect = card.getBoundingClientRect();
-    const cardCenter = cardRect.left + cardRect.width / 2;
-    const distance = Math.abs(cardCenter - carouselCenter);
-
-    if (distance < minDistance) {
-      minDistance = distance;
-      closestCard = card;
-    }
-  });
-
-  projectCards.forEach((card) => {
-    card.classList.toggle('center', card === closestCard);
-  });
-};
-
-const scrollCarousel = (direction) => {
-  if (!projectCarousel) return;
-  const cardWidth = projectCards[0]?.getBoundingClientRect().width || 250;
-  const scrollAmount = direction === 'left' ? -cardWidth : cardWidth;
-  projectCarousel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-};
-
-const debouncedUpdateCenterCard = debounce(updateCenterCard, 100);
-
 // Intersection Observers
 const skillObserver = new IntersectionObserver(
   (entries, observer) => {
@@ -112,20 +75,30 @@ const sectionObserver = new IntersectionObserver(
   (entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
-        if (entry.target.id === 'home' && window.scrollY === 0) {
-          entry.target.classList.add('visible');
-        } else {
-          entry.target.classList.add('visible');
-        }
-      } else {
-        entry.target.classList.remove('visible');
+        entry.target.classList.add('visible');
       }
     });
   },
-  { rootMargin: '0px 0px -150px 0px', threshold: 0.05 }
+  { rootMargin: '0px 0px -100px 0px', threshold: 0.1 }
 );
 
 // Event Listeners
+let lastScrollY = window.scrollY;
+const debouncedScrollHandler = debounce(() => {
+  updateActiveLink();
+
+  if (window.innerWidth <= 768 && !navLinksMobile.classList.contains('show')) {
+    if (window.scrollY > lastScrollY && window.scrollY > 100) {
+      navbar.classList.add('hide');
+    } else {
+      navbar.classList.remove('hide');
+    }
+  } else {
+    navbar.classList.remove('hide');
+  }
+  lastScrollY = window.scrollY;
+}, 100);
+
 if (navbar && navLinksMobile && hamburger) {
   hamburger.addEventListener('click', toggleMobileMenu);
 
@@ -151,47 +124,35 @@ navLinks.forEach((link) => {
   });
 });
 
-let lastScrollY = window.scrollY;
-const debouncedScrollHandler = debounce(() => {
-  updateActiveLink();
-
-  if (window.innerWidth <= 768 && !navLinksMobile.classList.contains('show')) {
-    if (window.scrollY > lastScrollY && window.scrollY > 100) {
-      navbar.classList.add('hide');
-    } else {
-      navbar.classList.remove('hide');
-    }
-  } else {
-    navbar.classList.remove('hide');
-  }
-  lastScrollY = window.scrollY;
-}, 100);
-
 window.addEventListener('scroll', debouncedScrollHandler);
-
-if (projectCarousel) {
-  projectCarousel.addEventListener('scroll', debouncedUpdateCenterCard);
-  window.addEventListener('resize', debouncedUpdateCenterCard);
-  carouselArrows.forEach((arrow) => {
-    arrow.addEventListener('click', () => {
-      const direction = arrow.classList.contains('left') ? 'left' : 'right';
-      scrollCarousel(direction);
-    });
-  });
-}
 
 // Initialization
 document.addEventListener('DOMContentLoaded', () => {
   if (!navbar || !navLinksMobile || !hamburger) {
-    console.warn('One or more navbar elements not found');
+    console.error('Navbar elements missing:', {
+      navbar,
+      navLinksMobile,
+      hamburger,
+    });
     return;
   }
-  if (!projectCarousel || projectCards.length === 0) {
-    console.warn('Project carousel or cards not found');
+  if (!document.querySelector('#home')) {
+    console.error('Home section not found');
+  }
+  if (skillCards.length === 0) {
+    console.warn('No skill cards found');
   }
 
   document.querySelector('#home')?.classList.add('visible');
-  skillCards.forEach((card) => skillObserver.observe(card));
+  skillCards.forEach((card) => {
+    if (
+      card.querySelector('.skill-progress') &&
+      card.querySelector('.progress-fill')
+    ) {
+      skillObserver.observe(card);
+    } else {
+      console.warn('Skill card missing progress elements:', card);
+    }
+  });
   sections.forEach((section) => sectionObserver.observe(section));
-  updateCenterCard();
 });
