@@ -5,6 +5,7 @@
   /* Backgrounds */
   --bg-primary: #1a2228;
   --bg-secondary: #2e3f4e;
+  --bg-secondary-opacity: rgba(46, 63, 78, 0.85);
   --bg-tertiary: #3f555d;
 
   /* Accent colors */
@@ -20,6 +21,11 @@
 
   /* Borders & dividers */
   --border-color: #2f3a42;
+  --border-gradient: radial-gradient(
+    circle,
+    rgba(151, 25, 29, 1) 0%,
+    rgba(58, 26, 34, 1) 50%
+  );
 }
 
 /* ==========================
@@ -157,7 +163,7 @@ body.menu-open > *:not(.navbar) {
   max-width: 1200px;
   margin: 0 auto;
   min-width: 50vh;
-
+  min-height: 50vh;
   /* initial animation state */
   opacity: 0;
   transition: opacity 0.6s ease, transform 0.6s ease;
@@ -280,12 +286,7 @@ body.menu-open > *:not(.navbar) {
   border-radius: 12px;
   padding: 1.5rem;
   text-align: left;
-  background: rgba(
-    46,
-    63,
-    78,
-    0.85
-  ); /* var(--bg-secondary) with ~85% opacity */
+  background: var(--bg-secondary-opacity);
   backdrop-filter: blur(4px); /*frosted glass effect */
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -365,6 +366,164 @@ body.menu-open > *:not(.navbar) {
 
 /* Projects */
 
+.carousel-container {
+  position: relative;
+  width: 100%;
+  max-width: 100%; /* Ensures no horizontal page scroll */
+  overflow: hidden;
+  margin: 0 auto;
+  user-select: none; /* Prevent text selection during swipe */
+}
+
+/* Fade/blur effects on edges to indicate scrollability (uses gradient fade) */
+.carousel-container::before,
+.carousel-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: var(--edge-fade-width, 15px); /* Customizable via CSS var */
+  z-index: 15;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    var(--bg-secondary) 0%,
+    transparent 100%
+  );
+}
+
+.carousel-container::after {
+  right: 0;
+  background: linear-gradient(
+    to left,
+    var(--bg-secondary) 0%,
+    transparent 100%
+  );
+}
+
+.carousel-track {
+  display: flex;
+  flex-direction: row;
+  transition: transform var(--carousel-speed, 0.5s) ease; /* Customizable speed */
+}
+
+.project-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1.5rem;
+  background: var(--bg-secondary-opacity);
+  border-radius: 12px;
+  border: 2px solid transparent;
+  border-image: var(--border-gradient);
+  transition: transform var(--carousel-speed, 0.5s) ease,
+    opacity var(--carousel-speed, 0.5s) ease;
+  will-change: transform, opacity; /* Performance hint for animations */
+}
+
+.project-image {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 8px;
+  max-height: 200px; /* Prevent overly tall images */
+}
+
+.project-content {
+  margin-top: 1rem;
+  width: 100%;
+}
+
+.project-description-wrapper {
+  display: block;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out;
+}
+
+.project-card.center .project-description-wrapper {
+  max-height: 500px;
+  opacity: 1;
+}
+
+.project-desc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+/* Classes for positioning effects (applied via JS) */
+.project-card.center {
+  transform: scale(1.2);
+  z-index: 10;
+  opacity: 1;
+}
+
+.project-card.prev,
+.project-card.next {
+  transform: scale(0.8);
+  opacity: 0.7;
+  z-index: 5;
+}
+
+/* Subtle hover effect */
+.project-card:hover {
+  filter: brightness(1.1);
+  transition: filter 0.3s ease;
+}
+
+/* Navigation areas (invisible halves; hover shows arrow symbol) */
+.carousel-nav-area {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  z-index: 20;
+  cursor: pointer;
+}
+
+.left-nav {
+  left: 0;
+}
+
+.right-nav {
+  right: 0;
+}
+
+.left-nav::after {
+  content: '<';
+  position: absolute;
+  top: 50%;
+  left: 10%;
+  transform: translateY(-50%);
+  font-size: 4rem;
+  color: var(--accent-red);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.left-nav:hover::after {
+  opacity: 0.6;
+}
+
+.right-nav::after {
+  content: '>';
+  position: absolute;
+  top: 50%;
+  right: 10%;
+  transform: translateY(-50%);
+  font-size: 4rem;
+  color: var(--accent-red);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.right-nav:hover::after {
+  opacity: 0.6;
+}
+
 /* Resume */
 .resume {
   background-image: url(images/resume-background.png);
@@ -439,6 +598,24 @@ footer {
     flex-direction: column;
     align-items: center;
   }
+  .project-card.center {
+    transform: scale(1); /* No scale on mobile for simplicity */
+  }
+
+  .project-card.prev,
+  .project-card.next {
+    transform: scale(1);
+    opacity: 0.5; /* Lower opacity on partial visible sides */
+  }
+
+  /* Smaller edge fades on mobile */
+  :root {
+    --edge-fade-width: 20px;
+  }
+  .left-nav::after,
+  .right-nav::after {
+    font-size: 3rem; /* Smaller arrows on mobile */
+  }
 }
 
 @media (max-width: 480px) {
@@ -447,5 +624,9 @@ footer {
   }
   .hero p {
     font-size: 0.9rem;
+  }
+
+  .project-card {
+    padding: 1rem;
   }
 }
