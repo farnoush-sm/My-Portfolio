@@ -171,7 +171,7 @@ const projectsData = [
     alt: 'Portfolio Website Screenshot',
     title: 'Portfolio Website',
     desc: 'A personal portfolio showcasing skills and projects with responsive design and animations.',
-    repoLink: '#',
+    repoLink: 'https://github.com/farnoush-sm/My-Portfolio.git',
   },
   {
     dataProject: 'helen-cafe',
@@ -179,7 +179,7 @@ const projectsData = [
     alt: 'Helen Cafe Screenshot',
     title: 'Helen Cafe',
     desc: 'Responsive e-commerce site prototype with product grids and cart functionality.',
-    repoLink: '#',
+    repoLink: 'https://github.com/farnoush-sm/Helen-Cafe.git',
   },
   {
     dataProject: 'weather-app',
@@ -187,7 +187,7 @@ const projectsData = [
     alt: 'Weather App Screenshot',
     title: 'Weather App',
     desc: 'Real-time weather fetcher using APIs, with dynamic UI updates.',
-    repoLink: '#',
+    repoLink: 'https://github.com/farnoush-sm/Practice.git',
   },
   {
     dataProject: 'todo-list',
@@ -195,7 +195,7 @@ const projectsData = [
     alt: 'To Do List Screenshot',
     title: 'To Do List',
     desc: 'A simple, clean to-do list application for task management.',
-    repoLink: '#',
+    repoLink: 'https://github.com/farnoush-sm/myToDoList.git',
   },
   {
     dataProject: 'signup-form',
@@ -203,7 +203,7 @@ const projectsData = [
     alt: 'Sign Up/In Form Screenshot',
     title: 'Sign Up/In Form',
     desc: 'A secure user authentication form with input validation, error handling, and responsive layout for seamless sign-up and login experiences.',
-    repoLink: '#',
+    repoLink: 'https://github.com/farnoush-sm/Practice.git',
   },
 ];
 
@@ -225,7 +225,7 @@ function createProjectCard(data) {
       <h3>${data.title}</h3>
       <div class="project-description-wrapper">
         <p class="project-desc">${data.desc}</p>
-        <a href="${data.repoLink}" class="project-link btn">View Repository</a>
+        <a href="${data.repoLink}" class="project-link btn" target="_blank">View Repository</a>
       </div>
     </div>
   `;
@@ -291,6 +291,28 @@ function setupCarousel() {
 
   // Item width (dynamic, based on rendered size)
   itemWidth = items[0].getBoundingClientRect().width;
+
+  // Add click and keyboard listeners for project cards
+  items.forEach((item, index) => {
+    item.addEventListener('click', () => {
+      if (!item.classList.contains('center')) {
+        const shift = index - currentIndex;
+        moveToIndex(currentIndex + shift);
+      }
+    });
+
+    // Make project link focusable and handle keyboard interaction
+    const link = item.querySelector('.project-link');
+    if (link) {
+      link.setAttribute('tabindex', '0');
+      link.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault(); // Prevent default scrolling behavior for Space
+          window.open(link.href, '_blank'); // Open the repository link
+        }
+      });
+    }
+  });
 
   // Initial position (no transition)
   carouselTrack.style.transition = 'none';
