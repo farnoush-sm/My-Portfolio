@@ -204,7 +204,6 @@
         <h2>Projects</h2>
 
         <div class="carousel-container">
-          <!-- Navigation areas for left/right clicks (invisible, cover halves of the container) -->
           <div
             class="carousel-nav-area left-nav"
             aria-label="Previous Project"
@@ -213,88 +212,8 @@
             class="carousel-nav-area right-nav"
             aria-label="Next Project"
           ></div>
-
-          <!-- The track holds all project cards, including clones for infinite looping -->
-          <div class="carousel-track">
-            <!-- Project Card 1 -->
-            <div class="project-card" data-project="portfolio">
-              <img
-                src="images/projects/myPortfolio.png"
-                alt="Portfolio Website Screenshot"
-                class="project-image"
-                loading="lazy"
-              />
-              <div class="project-content">
-                <h3>Portfolio Website</h3>
-                <div class="project-description-wrapper">
-                  <p class="project-desc">
-                    A personal portfolio showcasing skills and projects with
-                    responsive design and animations.
-                  </p>
-                  <a href="#" class="project-link btn">View Repository</a>
-                </div>
-              </div>
-            </div>
-
-            <!-- Project Card 2 -->
-            <div class="project-card" data-project="helen-cafe">
-              <img
-                src="images/projects/helenCafe.png"
-                alt="Helen Cafe Screenshot"
-                class="project-image"
-                loading="lazy"
-              />
-              <div class="project-content">
-                <h3>Helen Cafe</h3>
-                <div class="project-description-wrapper">
-                  <p class="project-desc">
-                    Responsive e-commerce site prototype with product grids and
-                    cart functionality.
-                  </p>
-                  <a href="#" class="project-link btn">View Repository</a>
-                </div>
-              </div>
-            </div>
-
-            <!-- Project Card 3 (Note: Image filename suggests sign-up, but title is Weather App; adjust as needed) -->
-            <div class="project-card" data-project="weather-app">
-              <img
-                src="images/projects/signUp-in.png"
-                alt="Weather App Screenshot"
-                class="project-image"
-                loading="lazy"
-              />
-              <div class="project-content">
-                <h3>Weather App</h3>
-                <div class="project-description-wrapper">
-                  <p class="project-desc">
-                    Real-time weather fetcher using APIs, with dynamic UI
-                    updates.
-                  </p>
-                  <a href="#" class="project-link btn">View Repository</a>
-                </div>
-              </div>
-            </div>
-
-            <!-- Project Card 4 -->
-            <div class="project-card" data-project="todo-list">
-              <img
-                src="images/projects/toDoList.png"
-                alt="To Do List Screenshot"
-                class="project-image"
-                loading="lazy"
-              />
-              <div class="project-content">
-                <h3>To Do List</h3>
-                <div class="project-description-wrapper">
-                  <p class="project-desc">
-                    A simple, clean to-do list application for task management.
-                  </p>
-                  <a href="#" class="project-link btn">View Repository</a>
-                </div>
-              </div>
-            </div>
-          </div>
+          <!-- The track holds all project cards, including clones for infinite looping (generated dynamically in JS) -->
+          <div class="carousel-track"></div>
         </div>
       </section>
 

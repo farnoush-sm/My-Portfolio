@@ -157,27 +157,82 @@ document.addEventListener('DOMContentLoaded', () => {
   sections.forEach((section) => sectionObserver.observe(section));
 });
 
-// ==========================
 // Carousel Functionality
-// ==========================
-// How the carousel works:
-// - Clones items at start/end for infinite looping.
-// - Slides the track via CSS transform.
-// - Applies classes (center, prev, next) to visible items for styling (scale, opacity, description visibility).
-// - Navigation: Click/hold on left/right nav areas; swipe on touch.
-// - On resize, resets clones and recalculates based on visibleCount.
-// - Infinite loop: On transitionend, jumps back without animation if beyond clones.
-// How to customize:
-// - Change visibleCount logic for different breakpoints.
-// - Adjust cloneCount for more/less buffer (higher = smoother for large visibleCount).
-// - Change slide speed: Update var(--carousel-speed) in CSS or transition in code.
-// - Change continuous scroll speed: Update setInterval delay in startSliding().
-// - To disable loop: Remove transitionend handler and clone logic; clamp currentIndex.
-
 const carouselContainer = document.querySelector('.carousel-container');
 const carouselTrack = document.querySelector('.carousel-track');
-const projectCards = carouselTrack.querySelectorAll('.project-card');
-const originalProjects = Array.from(projectCards); // Store originals for cloning
+const leftNav = document.querySelector('.left-nav');
+const rightNav = document.querySelector('.right-nav');
+
+// Define projects data dynamically (add/remove here as needed)
+const projectsData = [
+  {
+    dataProject: 'portfolio',
+    imgSrc: 'images/projects/myPortfolio.png',
+    alt: 'Portfolio Website Screenshot',
+    title: 'Portfolio Website',
+    desc: 'A personal portfolio showcasing skills and projects with responsive design and animations.',
+    repoLink: '#',
+  },
+  {
+    dataProject: 'helen-cafe',
+    imgSrc: 'images/projects/helenCafe.png',
+    alt: 'Helen Cafe Screenshot',
+    title: 'Helen Cafe',
+    desc: 'Responsive e-commerce site prototype with product grids and cart functionality.',
+    repoLink: '#',
+  },
+  {
+    dataProject: 'weather-app',
+    imgSrc: '', // Assuming no specific image available; triggers placeholder
+    alt: 'Weather App Screenshot',
+    title: 'Weather App',
+    desc: 'Real-time weather fetcher using APIs, with dynamic UI updates.',
+    repoLink: '#',
+  },
+  {
+    dataProject: 'todo-list',
+    imgSrc: 'images/projects/toDoList.png',
+    alt: 'To Do List Screenshot',
+    title: 'To Do List',
+    desc: 'A simple, clean to-do list application for task management.',
+    repoLink: '#',
+  },
+  {
+    dataProject: 'signup-form',
+    imgSrc: 'images/projects/signUp-in.png',
+    alt: 'Sign Up/In Form Screenshot',
+    title: 'Sign Up/In Form',
+    desc: 'A secure user authentication form with input validation, error handling, and responsive layout for seamless sign-up and login experiences.',
+    repoLink: '#',
+  },
+];
+
+// Create a project card element from data
+function createProjectCard(data) {
+  const card = document.createElement('div');
+  card.classList.add('project-card');
+  card.dataset.project = data.dataProject;
+
+  // Use placeholder if imgSrc is missing or empty
+  const effectiveImgSrc =
+    data.imgSrc && data.imgSrc.trim() !== '' && data.imgSrc !== '#'
+      ? data.imgSrc
+      : 'images/projects/projectPlaceHolder.png';
+
+  card.innerHTML = `
+    <img src="${effectiveImgSrc}" alt="${data.alt}" class="project-image" loading="lazy" />
+    <div class="project-content">
+      <h3>${data.title}</h3>
+      <div class="project-description-wrapper">
+        <p class="project-desc">${data.desc}</p>
+        <a href="${data.repoLink}" class="project-link btn">View Repository</a>
+      </div>
+    </div>
+  `;
+
+  return card;
+}
+
 let items; // Will include clones
 let currentIndex;
 let itemWidth;
@@ -189,13 +244,13 @@ let slideDirection; // 1 for next, -1 for prev
 let startX; // For swipe
 let isSwiping = false;
 
-const leftNav = document.querySelector('.left-nav');
-const rightNav = document.querySelector('.right-nav');
-
 // Setup carousel (called on init and resize)
 function setupCarousel() {
-  // Reset track to originals
+  // Clear track
   carouselTrack.innerHTML = '';
+
+  // Create original project cards from data
+  const originalProjects = projectsData.map(createProjectCard);
   originalProjects.forEach((card) => carouselTrack.appendChild(card));
 
   // Determine visible count based on screen width
@@ -203,7 +258,7 @@ function setupCarousel() {
     window.innerWidth < 768 ? 1 : window.innerWidth >= 1440 ? 5 : 3;
 
   // Clone count: Buffer for smooth looping (at least sides +1)
-  cloneCount = Math.floor(visibleCount / 2) + 1;
+  cloneCount = Math.floor(visibleCount / 2) + 3; // Extra buffer for smoother loops
 
   // Prepend clones of last items
   for (let i = 0; i < cloneCount; i++) {
@@ -247,14 +302,25 @@ function setupCarousel() {
     carouselTrack.style.transition =
       'transform var(--carousel-speed, 0.5s) ease';
   }, 0);
+
+  // Add click listeners for non-center cards
+  items.forEach((item, index) => {
+    item.addEventListener('click', () => {
+      if (!item.classList.contains('center')) {
+        const shift = index - currentIndex;
+        moveToIndex(currentIndex + shift);
+      }
+    });
+  });
 }
 
-// Update track position
+// Update track position to center the active item
 function updateTransform() {
   const containerWidth = carouselContainer.getBoundingClientRect().width;
-  const offset = containerWidth / 2 - itemWidth / 2;
+  // Calculate offset to center the current item
+  const offset = (containerWidth - itemWidth) / 2;
   carouselTrack.style.transform = `translateX(${
-    -currentIndex * itemWidth + offset
+    -(currentIndex * itemWidth) + offset
   }px)`;
 }
 
@@ -296,12 +362,16 @@ function prev() {
 }
 
 // Handle seamless loop on animation end
-carouselTrack.addEventListener('transitionend', () => {
-  const originalLength = originalProjects.length;
+carouselTrack.addEventListener('transitionend', (e) => {
+  if (e.propertyName !== 'transform') return; // Only handle transform transitions
+  const originalLength = projectsData.length;
   if (currentIndex >= originalLength + cloneCount) {
     carouselTrack.style.transition = 'none';
     currentIndex -= originalLength;
     updateTransform();
+    updateClasses(); // Reapply classes immediately after reset
+    // Force reflow to ensure no visual glitch
+    carouselTrack.offsetHeight;
     setTimeout(() => {
       carouselTrack.style.transition =
         'transform var(--carousel-speed, 0.5s) ease';
@@ -310,6 +380,9 @@ carouselTrack.addEventListener('transitionend', () => {
     carouselTrack.style.transition = 'none';
     currentIndex += originalLength;
     updateTransform();
+    updateClasses(); // Reapply classes immediately after reset
+    // Force reflow to ensure no visual glitch
+    carouselTrack.offsetHeight;
     setTimeout(() => {
       carouselTrack.style.transition =
         'transform var(--carousel-speed, 0.5s) ease';
@@ -351,8 +424,10 @@ carouselContainer.addEventListener('touchstart', (e) => {
 carouselContainer.addEventListener('touchmove', (e) => {
   if (!isSwiping) return;
   const delta = startX - e.touches[0].clientX;
+  const containerWidth = carouselContainer.getBoundingClientRect().width;
+  const offset = (containerWidth - itemWidth) / 2;
   carouselTrack.style.transform = `translateX(${
-    -currentIndex * itemWidth - delta
+    -(currentIndex * itemWidth) + offset - delta
   }px)`;
 });
 
