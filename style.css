@@ -373,6 +373,7 @@ body.menu-open > *:not(.navbar) {
   overflow: hidden;
   margin: 0 auto;
   user-select: none; /* Prevent text selection during swipe */
+  background: transparent;
 }
 
 /* Fade/blur effects on edges to indicate scrollability (uses gradient fade) */
@@ -382,7 +383,7 @@ body.menu-open > *:not(.navbar) {
   position: absolute;
   top: 0;
   height: 100%;
-  width: var(--edge-fade-width, 50px); /* Customizable via CSS var */
+  width: var(--edge-fade-width, 40px); /* Customizable via CSS var */
   z-index: 15;
   pointer-events: none;
   background: linear-gradient(
