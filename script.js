@@ -26,26 +26,6 @@ const toggleMobileMenu = () => {
   hamburger.setAttribute('aria-expanded', !isExpanded);
 };
 
-const updateActiveLink = () => {
-  const viewportTop = window.scrollY;
-  let current = '';
-
-  sections.forEach((section) => {
-    const sectionTop = section.offsetTop;
-    const sectionBottom = sectionTop + section.offsetHeight;
-    if (viewportTop >= sectionTop - 90 && viewportTop < sectionBottom - 90) {
-      current = section.getAttribute('id');
-    }
-  });
-
-  navLinks.forEach((link) => {
-    link.classList.remove('active');
-    if (link.getAttribute('href') === `#${current}`) {
-      link.classList.add('active');
-    }
-  });
-};
-
 // Intersection Observers
 const skillObserver = new IntersectionObserver(
   (entries, observer) => {
@@ -82,11 +62,27 @@ const sectionObserver = new IntersectionObserver(
   { rootMargin: '0px 0px -100px 0px', threshold: 0.1 }
 );
 
+// New Intersection Observer for active nav link
+const navLinkObserver = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        const sectionId = entry.target.getAttribute('id');
+        navLinks.forEach((link) => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === `#${sectionId}`) {
+            link.classList.add('active');
+          }
+        });
+      }
+    });
+  },
+  { threshold: 0.4 } // Trigger when 40% of the section is in viewport
+);
+
 // Event Listeners
 let lastScrollY = window.scrollY;
 const debouncedScrollHandler = debounce(() => {
-  updateActiveLink();
-
   if (window.innerWidth <= 768 && !navLinksMobile.classList.contains('show')) {
     if (window.scrollY > lastScrollY && window.scrollY > 100) {
       navbar.classList.add('hide');
@@ -154,7 +150,10 @@ document.addEventListener('DOMContentLoaded', () => {
       console.warn('Skill card missing progress elements:', card);
     }
   });
-  sections.forEach((section) => sectionObserver.observe(section));
+  sections.forEach((section) => {
+    sectionObserver.observe(section);
+    navLinkObserver.observe(section); // Observe sections for nav link updates
+  });
 });
 
 // Carousel Functionality

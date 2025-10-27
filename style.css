@@ -98,23 +98,39 @@ body {
   list-style: none;
   display: flex;
   gap: 1.5rem;
+  position: relative; /* For positioning the underline */
 }
 
 .nav-links a {
   text-decoration: none;
   color: var(--text-primary);
   transition: color 0.3s;
-}
-
-.nav-links a:focus {
-  outline: 2px solid var(--accent-red);
-  outline-offset: 2px;
+  position: relative; /* For pseudo-element positioning */
 }
 
 .nav-links a:hover,
 .nav-links a.active {
   color: var(--accent-red);
   font-weight: 600;
+}
+
+/* Sliding underline for active link (desktop only) */
+@media (min-width: 769px) {
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px; /* Below the link */
+    left: 0;
+    width: 0;
+    height: 2px; /* Narrow line */
+    background-color: var(--accent-red);
+    transition: width 0.3s ease, transform 0.3s ease;
+    transform-origin: left;
+  }
+
+  .nav-links a.active::after {
+    width: 100%; /* Full width for active link */
+  }
 }
 
 /* Hamburger icon */
@@ -349,7 +365,7 @@ body.menu-open > *:not(.navbar) {
 /* filled portion of the bar */
 .progress-fill {
   height: 100%;
-  width: 0; /* JS sets the actual with*/
+  width: 0; /* JS sets the actual width*/
   border-radius: 5px;
   background: linear-gradient(
     to right,
@@ -414,7 +430,7 @@ body.menu-open > *:not(.navbar) {
   align-items: center;
   text-align: center;
   padding: 10px 0 1.5rem 0;
-  background: var(--bg-secondary-opacity);
+  background: transparent;
   border-radius: 6px;
   border: none;
   transition: transform var(--carousel-speed, 0.5s) ease,
